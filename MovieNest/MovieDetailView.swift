@@ -16,6 +16,11 @@ struct MovieDetailView: View {
     private var isFavorited: Bool {
         favorites.contains(where: { $0.movieId == movie.id })
     }
+
+    private var genres: [Genre] {
+        guard let ids = movie.genreIds else { return [] }
+        return Genre.allCases.filter { ids.contains($0.rawValue) }
+    }
     
     var body: some View {
         ScrollView {
@@ -51,7 +56,22 @@ struct MovieDetailView: View {
                 if let rating = movie.voteAverage {
                     Text("⭐️ \(rating, specifier: "%.1f")")
                 }
-                
+
+                if !genres.isEmpty {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
+                            ForEach(genres) { genre in
+                                Text(genre.name)
+                                    .font(.caption)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(Color(.systemGray5))
+                                    .clipShape(Capsule())
+                            }
+                        }
+                    }
+                }
+
                 Text(movie.overview)
                     .padding(.top, 8)
             }
@@ -69,9 +89,16 @@ struct MovieDetailView: View {
                 title: movie.title,
                 posterPath: movie.posterPath,
                 overview: movie.overview,
-                releaseDate: movie.releaseDate
+                releaseDate: movie.releaseDate,
+                voteAverage: movie.voteAverage,
+                genreIds: movie.genreIds
             )
             modelContext.insert(favorite)
+        }
+        do {
+            try modelContext.save()
+        } catch {
+            print("SwiftData save error: \(error)")
         }
     }
 }

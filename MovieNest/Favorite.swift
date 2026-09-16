@@ -15,13 +15,17 @@ class Favorite {
     var posterPath: String?
     var overview: String
     var releaseDate: String?
- 
-    init(movieId: Int, title: String, posterPath: String?, overview: String, releaseDate: String?) {
+    var voteAverage: Double?
+    var genreIds: [Int]?
+
+    init(movieId: Int, title: String, posterPath: String?, overview: String, releaseDate: String?, voteAverage: Double?, genreIds: [Int]?) {
         self.movieId = movieId
         self.title = title
         self.posterPath = posterPath
         self.overview = overview
         self.releaseDate = releaseDate
+        self.voteAverage = voteAverage
+        self.genreIds = genreIds
     }
 }
 

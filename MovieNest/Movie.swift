@@ -14,12 +14,14 @@ struct Movie: Codable, Identifiable {
     let posterPath: String?
     let releaseDate: String?
     let voteAverage: Double?
- 
+    let genreIds: [Int]?
+
     enum CodingKeys: String, CodingKey {
         case id, title, overview
         case posterPath = "poster_path"
         case releaseDate = "release_date"
         case voteAverage = "vote_average"
+        case genreIds = "genre_ids"
     }
     
     var posterURL: URL? {

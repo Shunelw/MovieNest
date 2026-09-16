@@ -10,10 +10,20 @@ import SwiftData
 
 @main
 struct MovieNestApp: App {
+    let container: ModelContainer
+
+    init() {
+        do {
+            container = try ModelContainer(for: Favorite.self)
+        } catch {
+            fatalError("Failed to create ModelContainer: \(error)")
+        }
+    }
+
     var body: some Scene {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(for: Favorite.self)
+        .modelContainer(container)
     }
 }

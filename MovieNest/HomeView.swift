@@ -27,14 +27,22 @@ struct HomeView: View {
                                 .frame(width: 80, height: 120)
                         }
  
-                        VStack(alignment: .leading) {
+                        VStack(alignment: .leading, spacing: 4) {
                             Text(movie.title)
                             Text(movie.releaseDate ?? "")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            if let rating = movie.voteAverage {
+                                Text("⭐️ \(rating, specifier: "%.1f")")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
                         }
                     }
                 }
             }
             .navigationTitle("MovieNest")
+            .navigationBarTitleDisplayMode(.inline)
             .task {
                 do {
                     movies = try await service.fetchTrendingMovies()
