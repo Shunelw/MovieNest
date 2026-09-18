@@ -17,9 +17,10 @@ class Favorite {
     var releaseDate: String?
     var voteAverage: Double?
     var genreIds: [Int]?
-    var actors: [String]?
+    var castNames: [String]?
+    var castProfilePaths: [String]?
 
-    init(movieId: Int, title: String, posterPath: String?, overview: String, releaseDate: String?, voteAverage: Double?, genreIds: [Int]?, actors: [String]? = nil) {
+    init(movieId: Int, title: String, posterPath: String?, overview: String, releaseDate: String?, voteAverage: Double?, genreIds: [Int]?, castNames: [String]? = nil, castProfilePaths: [String]? = nil) {
         self.movieId = movieId
         self.title = title
         self.posterPath = posterPath
@@ -27,6 +28,7 @@ class Favorite {
         self.releaseDate = releaseDate
         self.voteAverage = voteAverage
         self.genreIds = genreIds
-        self.actors = actors
+        self.castNames = castNames
+        self.castProfilePaths = castProfilePaths
     }
 }

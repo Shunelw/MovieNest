@@ -12,7 +12,7 @@ struct MovieDetailView: View {
     let movie: Movie
     @Environment(\.modelContext) private var modelContext
     @Query private var favorites: [Favorite]
-    @State private var actors: [String] = []
+    @State private var casts: [CastMember] = []
     private let service = MovieService()
     
     private var isFavorited: Bool {
@@ -74,12 +74,38 @@ struct MovieDetailView: View {
                     }
                 }
 
-                if !actors.isEmpty {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Actors")
+                if !casts.isEmpty {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Casts")
                             .font(.headline)
-                        Text(actors.joined(separator: ", "))
-                            .foregroundStyle(.secondary)
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 12) {
+                                ForEach(casts) { cast in
+                                    VStack(spacing: 6) {
+                                        AsyncImage(url: cast.profileURL) { image in
+                                            image
+                                                .resizable()
+                                                .scaledToFill()
+                                        } placeholder: {
+                                            Image(systemName: "person.fill")
+                                                .resizable()
+                                                .scaledToFit()
+                                                .padding(18)
+                                                .foregroundStyle(.secondary)
+                                                .background(Color(.systemGray5))
+                                        }
+                                        .frame(width: 72, height: 104)
+                                        .clipShape(RoundedRectangle(cornerRadius: 8))
+
+                                        Text(cast.name)
+                                            .font(.caption)
+                                            .multilineTextAlignment(.center)
+                                            .lineLimit(2)
+                                            .frame(width: 80)
+                                    }
+                                }
+                            }
+                        }
                     }
                     .padding(.top, 4)
                 }
@@ -91,7 +117,7 @@ struct MovieDetailView: View {
         }
         .navigationTitle(movie.title)
         .task {
-            await loadActors()
+            await loadCasts()
         }
     }
     
@@ -107,7 +133,8 @@ struct MovieDetailView: View {
                 releaseDate: movie.releaseDate,
                 voteAverage: movie.voteAverage,
                 genreIds: movie.genreIds,
-                actors: actors.isEmpty ? movie.actors : actors
+                castNames: currentCasts.map(\.name),
+                castProfilePaths: currentCasts.map { $0.profilePath ?? "" }
             )
             modelContext.insert(favorite)
         }
@@ -118,24 +145,29 @@ struct MovieDetailView: View {
         }
     }
 
-    private func loadActors() async {
-        actors = movie.actors ?? []
-        guard actors.isEmpty else { return }
+    private var currentCasts: [CastMember] {
+        casts.isEmpty ? (movie.casts ?? []) : casts
+    }
+
+    private func loadCasts() async {
+        casts = movie.casts ?? []
+        guard casts.isEmpty else { return }
 
         do {
-            actors = try await service.fetchMovieActors(movieId: movie.id)
-            updateFavoriteActors()
+            casts = try await service.fetchMovieCasts(movieId: movie.id)
+            updateFavoriteCasts()
         } catch {
-            print("Actor fetch error: \(error)")
+            print("Cast fetch error: \(error)")
         }
     }
 
-    private func updateFavoriteActors() {
-        guard !actors.isEmpty,
+    private func updateFavoriteCasts() {
+        guard !casts.isEmpty,
               let favorite = favorites.first(where: { $0.movieId == movie.id }) else {
             return
         }
-        favorite.actors = actors
+        favorite.castNames = casts.map(\.name)
+        favorite.castProfilePaths = casts.map { $0.profilePath ?? "" }
         do {
             try modelContext.save()
         } catch {

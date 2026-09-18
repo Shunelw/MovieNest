@@ -17,8 +17,20 @@ struct CreditsResponse: Decodable {
     let cast: [CastMember]
 }
 
-struct CastMember: Decodable {
+struct CastMember: Codable, Identifiable, Hashable {
+    let id: Int
     let name: String
+    let profilePath: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id, name
+        case profilePath = "profile_path"
+    }
+
+    var profileURL: URL? {
+        guard let profilePath else { return nil }
+        return URL(string: "https://image.tmdb.org/t/p/w185\(profilePath)")
+    }
 }
  
 class MovieService {
@@ -100,7 +112,7 @@ class MovieService {
         }
     }
 
-    func fetchMovieActors(movieId: Int) async throws -> [String] {
+    func fetchMovieCasts(movieId: Int) async throws -> [CastMember] {
         guard let url = URL(string: "\(baseURL)/movie/\(movieId)/credits?api_key=\(apiKey)") else {
             throw NetworkError.invalidURL
         }
@@ -114,10 +126,9 @@ class MovieService {
 
         do {
             let decoded = try JSONDecoder().decode(CreditsResponse.self, from: data)
-            return Array(decoded.cast.prefix(6)).map(\.name)
+            return Array(decoded.cast.prefix(6))
         } catch {
             throw NetworkError.decodingFailed
         }
     }
 }
-

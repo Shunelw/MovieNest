@@ -14,6 +14,7 @@ struct FavoritesView: View {
     var body: some View {
         NavigationStack {
             List(favorites) { favorite in
+                let casts = makeCasts(from: favorite)
                 let movie = Movie(
                     id: favorite.movieId,
                     title: favorite.title,
@@ -22,7 +23,7 @@ struct FavoritesView: View {
                     releaseDate: favorite.releaseDate,
                     voteAverage: favorite.voteAverage,
                     genreIds: favorite.genreIds,
-                    actors: favorite.actors
+                    casts: casts
                 )
  
                 NavigationLink(destination: MovieDetailView(movie: movie)) {
@@ -47,8 +48,27 @@ struct FavoritesView: View {
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }
-                            if let actors = movie.actors, !actors.isEmpty {
-                                Text(actors.prefix(3).joined(separator: ", "))
+                            if !casts.isEmpty {
+                                HStack(spacing: 6) {
+                                    ForEach(Array(casts.prefix(3))) { cast in
+                                        AsyncImage(url: cast.profileURL) { image in
+                                            image
+                                                .resizable()
+                                                .scaledToFill()
+                                        } placeholder: {
+                                            Image(systemName: "person.fill")
+                                                .resizable()
+                                                .scaledToFit()
+                                                .padding(8)
+                                                .foregroundStyle(.secondary)
+                                                .background(Color(.systemGray5))
+                                        }
+                                        .frame(width: 28, height: 42)
+                                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                                    }
+                                }
+
+                                Text(casts.prefix(3).map(\.name).joined(separator: ", "))
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                                     .lineLimit(2)
@@ -59,6 +79,20 @@ struct FavoritesView: View {
             }
             .navigationTitle("Favorites")
             .navigationBarTitleDisplayMode(.inline)
+        }
+    }
+
+    private func makeCasts(from favorite: Favorite) -> [CastMember] {
+        guard let castNames = favorite.castNames else { return [] }
+        let profilePaths = favorite.castProfilePaths ?? []
+
+        return castNames.enumerated().map { index, name in
+            let profilePath = index < profilePaths.count ? profilePaths[index] : ""
+            return CastMember(
+                id: index,
+                name: name,
+                profilePath: profilePath.isEmpty ? nil : profilePath
+            )
         }
     }
 }
