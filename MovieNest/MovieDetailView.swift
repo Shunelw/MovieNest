@@ -99,9 +99,9 @@ struct MovieDetailView: View {
 
                                         Text(cast.name)
                                             .font(.caption)
-                                            .multilineTextAlignment(.center)
-                                            .lineLimit(2)
-                                            .frame(width: 80)
+                                            .lineLimit(1)
+                                            .truncationMode(.tail)
+                                            .frame(width: 72)
                                     }
                                 }
                             }
