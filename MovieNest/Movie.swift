@@ -15,6 +15,7 @@ struct Movie: Codable, Identifiable {
     let releaseDate: String?
     let voteAverage: Double?
     let genreIds: [Int]?
+    let actors: [String]?
 
     enum CodingKeys: String, CodingKey {
         case id, title, overview
@@ -22,6 +23,7 @@ struct Movie: Codable, Identifiable {
         case releaseDate = "release_date"
         case voteAverage = "vote_average"
         case genreIds = "genre_ids"
+        case actors
     }
     
     var posterURL: URL? {

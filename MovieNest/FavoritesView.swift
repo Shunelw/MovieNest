@@ -21,7 +21,8 @@ struct FavoritesView: View {
                     posterPath: favorite.posterPath,
                     releaseDate: favorite.releaseDate,
                     voteAverage: favorite.voteAverage,
-                    genreIds: favorite.genreIds
+                    genreIds: favorite.genreIds,
+                    actors: favorite.actors
                 )
  
                 NavigationLink(destination: MovieDetailView(movie: movie)) {
@@ -45,6 +46,12 @@ struct FavoritesView: View {
                                 Text("⭐️ \(rating, specifier: "%.1f")")
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
+                            }
+                            if let actors = movie.actors, !actors.isEmpty {
+                                Text(actors.prefix(3).joined(separator: ", "))
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(2)
                             }
                         }
                     }

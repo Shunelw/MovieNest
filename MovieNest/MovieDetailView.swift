@@ -12,6 +12,8 @@ struct MovieDetailView: View {
     let movie: Movie
     @Environment(\.modelContext) private var modelContext
     @Query private var favorites: [Favorite]
+    @State private var actors: [String] = []
+    private let service = MovieService()
     
     private var isFavorited: Bool {
         favorites.contains(where: { $0.movieId == movie.id })
@@ -72,12 +74,25 @@ struct MovieDetailView: View {
                     }
                 }
 
+                if !actors.isEmpty {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Actors")
+                            .font(.headline)
+                        Text(actors.joined(separator: ", "))
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(.top, 4)
+                }
+
                 Text(movie.overview)
                     .padding(.top, 8)
             }
             .padding()
         }
         .navigationTitle(movie.title)
+        .task {
+            await loadActors()
+        }
     }
     
     private func toggleFavorite() {
@@ -91,10 +106,36 @@ struct MovieDetailView: View {
                 overview: movie.overview,
                 releaseDate: movie.releaseDate,
                 voteAverage: movie.voteAverage,
-                genreIds: movie.genreIds
+                genreIds: movie.genreIds,
+                actors: actors.isEmpty ? movie.actors : actors
             )
             modelContext.insert(favorite)
         }
+        do {
+            try modelContext.save()
+        } catch {
+            print("SwiftData save error: \(error)")
+        }
+    }
+
+    private func loadActors() async {
+        actors = movie.actors ?? []
+        guard actors.isEmpty else { return }
+
+        do {
+            actors = try await service.fetchMovieActors(movieId: movie.id)
+            updateFavoriteActors()
+        } catch {
+            print("Actor fetch error: \(error)")
+        }
+    }
+
+    private func updateFavoriteActors() {
+        guard !actors.isEmpty,
+              let favorite = favorites.first(where: { $0.movieId == movie.id }) else {
+            return
+        }
+        favorite.actors = actors
         do {
             try modelContext.save()
         } catch {

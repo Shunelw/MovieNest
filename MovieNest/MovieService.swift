@@ -12,6 +12,14 @@ enum NetworkError: Error {
     case invalidResponse
     case decodingFailed
 }
+
+struct CreditsResponse: Decodable {
+    let cast: [CastMember]
+}
+
+struct CastMember: Decodable {
+    let name: String
+}
  
 class MovieService {
     private let apiKey = "fda9c1cb534d837aacb78967dc640f16"
@@ -91,6 +99,25 @@ class MovieService {
             throw NetworkError.decodingFailed
         }
     }
-}
 
+    func fetchMovieActors(movieId: Int) async throws -> [String] {
+        guard let url = URL(string: "\(baseURL)/movie/\(movieId)/credits?api_key=\(apiKey)") else {
+            throw NetworkError.invalidURL
+        }
+
+        let (data, response) = try await URLSession.shared.data(from: url)
+
+        guard let httpResponse = response as? HTTPURLResponse,
+              httpResponse.statusCode == 200 else {
+            throw NetworkError.invalidResponse
+        }
+
+        do {
+            let decoded = try JSONDecoder().decode(CreditsResponse.self, from: data)
+            return Array(decoded.cast.prefix(6)).map(\.name)
+        } catch {
+            throw NetworkError.decodingFailed
+        }
+    }
+}
 
