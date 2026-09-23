@@ -48,31 +48,6 @@ struct FavoritesView: View {
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }
-                            if !casts.isEmpty {
-                                HStack(spacing: 6) {
-                                    ForEach(Array(casts.prefix(3))) { cast in
-                                        AsyncImage(url: cast.profileURL) { image in
-                                            image
-                                                .resizable()
-                                                .scaledToFill()
-                                        } placeholder: {
-                                            Image(systemName: "person.fill")
-                                                .resizable()
-                                                .scaledToFit()
-                                                .padding(8)
-                                                .foregroundStyle(.secondary)
-                                                .background(Color(.systemGray5))
-                                        }
-                                        .frame(width: 28, height: 42)
-                                        .clipShape(RoundedRectangle(cornerRadius: 4))
-                                    }
-                                }
-
-                                Text(casts.prefix(3).map(\.name).joined(separator: ", "))
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(2)
-                            }
                         }
                     }
                 }

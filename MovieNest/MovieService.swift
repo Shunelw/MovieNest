@@ -41,14 +41,34 @@ class MovieService {
         guard let url = URL(string: "\(baseURL)/trending/movie/week?api_key=\(apiKey)") else {
             throw NetworkError.invalidURL
         }
- 
+
         let (data, response) = try await URLSession.shared.data(from: url)
- 
+
         guard let httpResponse = response as? HTTPURLResponse,
               httpResponse.statusCode == 200 else {
             throw NetworkError.invalidResponse
         }
- 
+
+        do {
+            let decoded = try JSONDecoder().decode(MovieResponse.self, from: data)
+            return decoded.results
+        } catch {
+            throw NetworkError.decodingFailed
+        }
+    }
+
+    func fetchTrendingMoviesToday() async throws -> [Movie] {
+        guard let url = URL(string: "\(baseURL)/trending/movie/day?api_key=\(apiKey)") else {
+            throw NetworkError.invalidURL
+        }
+
+        let (data, response) = try await URLSession.shared.data(from: url)
+
+        guard let httpResponse = response as? HTTPURLResponse,
+              httpResponse.statusCode == 200 else {
+            throw NetworkError.invalidResponse
+        }
+
         do {
             let decoded = try JSONDecoder().decode(MovieResponse.self, from: data)
             return decoded.results
