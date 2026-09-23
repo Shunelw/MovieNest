@@ -9,7 +9,6 @@ import SwiftUI
  
 struct HomeView: View {
     @State private var weeklyMovies: [Movie] = []
-    @State private var todayMovies: [Movie] = []
     @State private var errorMessage: String?
     private let service = MovieService()
 
@@ -21,20 +20,12 @@ struct HomeView: View {
                         movieRow(movie)
                     }
                 }
-                Section("Trending Today") {
-                    ForEach(todayMovies) { movie in
-                        movieRow(movie)
-                    }
-                }
             }
             .navigationTitle("MovieNest")
             .navigationBarTitleDisplayMode(.inline)
             .task {
                 do {
-                    async let weekly = service.fetchTrendingMovies()
-                    async let today = service.fetchTrendingMoviesToday()
-                    weeklyMovies = try await weekly
-                    todayMovies = try await today
+                    weeklyMovies = try await service.fetchTrendingMovies()
                 } catch {
                     errorMessage = "Couldn't load movies. Check your connection."
                 }
